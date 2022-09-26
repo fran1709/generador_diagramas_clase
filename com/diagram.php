@@ -101,8 +101,7 @@ $result = pg_query($conn, "Select table_schema,table_name from information_Schem
 where table_type ='BASE TABLE' and table_schema not in ('pg_catalog','information_schema') and table_name in ($cadena)");
 
 $pu="@startuml CTEC\n";
-while ($row = pg_fetch_row($result)) 
-{
+while ($row = pg_fetch_row($result)) {
      $pu=$pu."class $row[0].$row[1]{\n";
 
      $result_colums = pg_query($conn, "Select column_name, data_type from information_Schema.columns
@@ -115,9 +114,61 @@ while ($row = pg_fetch_row($result))
      $pu=$pu."}\n\n";
 
 }
-/*Relaciones quemadas para base de datos CTEC*/
 
-/*********************************************/
+if(isset($_GET['table1'])) {
+     $table1 = $_GET['table1'];
+     $table2 = $_GET['table2'];
+     $query = "Select table_schema,table_name from information_Schema.tables 
+     where table_type ='BASE TABLE' and table_schema not in ('pg_catalog','information_schema') 
+     and table_name in ('$table1','$table2')";
+     $result1 = pg_query($conn, $query);
+
+     $pDir=$_GET['direction'];
+     $pRol=$_GET['rol'];
+     $pC1=$_GET['cardinalidad1'];
+     $pC2=$_GET['cardinalidad2'];
+     $pRel=$_GET['tipoRelacion'];
+
+     $c = '"';
+     while ($row = pg_fetch_result($result1,0)) {
+         if ($pRel=="Herencia" & $pDir=="Izq"){
+             $pu= $pu."$table1 $c$pC1$c --|> $pC2 $table2 : $pRol \n";
+             break;
+         }
+         elseif($pRel=="Herencia" & $pDir=="Der"){
+             $pu= $pu."$table2 $c$pC2$c  <|-- $c$pC1$c  $table1 : $pRol \n";
+             break;
+         }
+         elseif($pRel=="Composicion" & $pDir=="Izq"){
+             $pu= $pu."$table1 $c$pC1$c --* $c$pC2$c $table2 : $pRol \n";
+             break;
+         }
+         elseif($pRel=="Composicion" & $pDir=="Der"){
+             $pu= $pu."$table2 $c$pC2$c *-- $c$pC1$c $table1 : $pRol \n";
+             break;
+         }
+         elseif ($pRel=="Agregacion" & $pDir=="Izq"){
+             $pu= $pu."$table1 $c$pC1$c --o $c$pC2$c $table2 : $pRol \n";
+             break;
+         }
+         elseif($pRel=="Agregacion" & $pDir=="Der"){
+             $pu= $pu."$table2 $c$pC2$c o-- $c$pC1$c $table1 : $pRol \n";
+             break;
+         }
+         elseif ($pRel=="Asociacion" & $pDir=="Izq"){
+             $pu= $pu."$table1 $c$pC1$c --> $c$pC2$c $table2 : $pRol \n";
+             break;
+         }
+         elseif($pRel=="Asociacion" & $pDir=="Der"){
+             $pu= $pu."$table2 $c$pC2$c <-- $c$pC1$c $table1 : $pRol \n";
+             break;
+         }
+         elseif($pRel=="Asociacion" & $pDir=="Bid"){
+             $pu= $pu."$table2 $c$pC2$c -- $c$pC1$c $table1 : $pRol \n";
+             break;
+         }
+     }
+ }
 
 $pu= $pu."@enduml";
 
