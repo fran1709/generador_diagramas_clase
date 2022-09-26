@@ -1,6 +1,6 @@
 <?php
 
-//Variables de Inicio de Sesión.
+// Variables de Inicio de Sesión.
 if(isset($_POST['txtHost'])){
     $pHost=$_POST['txtHost'];
     $pPort=$_POST['txtPort'];
@@ -15,6 +15,45 @@ if(isset($_POST['txtHost'])){
     }
 }
 $conection = pg_connect("host=localhost port=5432 dbname=CTEC user=postgres password=12345");
+$dolar = "$";
+$body = "BODY";
+//$dropQuery = "drop table public.diagramas ";
+//pg_query($conection,$dropQuery);
+$queryInitial = "CREATE TABLE public.diagramas(
+    nombre varchar(100) primary key,
+    creador varchar(100) NOT NULL,
+    codigoUML json NOT NULL,
+    CONSTRAINT diagramas_nombre UNIQUE (nombre));
+ 
+    GRANT INSERT, SELECT, DELETE ON TABLE public.diagramas TO $pUser;
+
+
+    CREATE OR REPLACE FUNCTION public.ins_diagrama(p_nombre varchar,p_creador varchar,p_codigouml json)
+    RETURNS VOID
+    SECURITY DEFINER
+    AS
+    $$
+    BEGIN
+        INSERT INTO public.diagramas(nombre, creador, codigouml)
+        VALUES (p_nombre, p_creador, p_codigouml);
+    END
+    $$
+    LANGUAGE PLPGSQL;
+
+    CREATE OR REPLACE FUNCTION public.del_diagramas(p_nombre varchar)
+    RETURNS void
+    SECURITY DEFINER
+    AS $dolar$body$dolar
+    BEGIN
+        DELETE FROM public.diagramas
+        where
+            nombre=p_nombre;
+    END
+    $dolar$body$dolar
+    LANGUAGE 'plpgsql';";
+
+//query inicial que se encarga de crear la tabla en donde se guardan los esquemas y funciones (insertar,eliminar)
+//$pgQueryInitial = pg_query($conection, $queryInitial);
 
 
 ?>
@@ -94,8 +133,7 @@ $conection = pg_connect("host=localhost port=5432 dbname=CTEC user=postgres pass
                             <?php } ?>   
                         </select>
                     </li>
-                    <br>
-                    <button type="submit" id="tableSchema" itemid="schema">Generate Diagram</button>
+                    
                 </ul>
                 <h2>Create Relation Between Tables</h2>
                 <ul id="col">
@@ -157,7 +195,6 @@ $conection = pg_connect("host=localhost port=5432 dbname=CTEC user=postgres pass
                         <option value="1">1</option>
                         <option value="n">n</option>
                     </select>
-                    
                 </li>
                 <br>
                 <li>
@@ -173,11 +210,10 @@ $conection = pg_connect("host=localhost port=5432 dbname=CTEC user=postgres pass
                         <option value="Asociacion">Asociación</option>
                         <option value="Agregacion">Agregación</option>
                         <option value="Composicion">Composición</option>
-                    </select>
-                    
+                    </select> 
                 </li>
                 <br></br>
-                <button type="submit" id="table2" id="table1">Generate Relation</button>
+                <button type="submit" id="table2" id="table1">Generate Diagram with Relations</button>
             </ul>
             </section>  
         </form>

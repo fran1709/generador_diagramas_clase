@@ -67,7 +67,6 @@ function encode64($c) {
     return $str;
 }
 
-
 $conn = pg_connect("host=localhost port=5432 dbname=CTEC user=postgres password=12345");
 
 $atributes = $_GET['atribute']; //LISTA DE atributos
@@ -118,10 +117,15 @@ while ($row = pg_fetch_row($result)) {
 if(isset($_GET['table1'])) {
      $table1 = $_GET['table1'];
      $table2 = $_GET['table2'];
-     $query = "Select table_schema,table_name from information_Schema.tables 
+     $query = "Select table_schema from information_Schema.tables 
      where table_type ='BASE TABLE' and table_schema not in ('pg_catalog','information_schema') 
-     and table_name in ('$table1','$table2')";
+     and table_name = '$table1'";
+     $query2 = "Select table_schema from information_Schema.tables 
+     where table_type ='BASE TABLE' and table_schema not in ('pg_catalog','information_schema') 
+     and table_name = '$table2'";
+
      $result1 = pg_query($conn, $query);
+     $result2= pg_query($conn,$query2);
 
      $pDir=$_GET['direction'];
      $pRol=$_GET['rol'];
@@ -130,45 +134,50 @@ if(isset($_GET['table1'])) {
      $pRel=$_GET['tipoRelacion'];
 
      $c = '"';
-     while ($row = pg_fetch_result($result1,0)) {
-         if ($pRel=="Herencia" & $pDir=="Izq"){
-             $pu= $pu."$table1 $c$pC1$c --|> $pC2 $table2 : $pRol \n";
+     switch ($row = pg_fetch_row($result1) and $row2= pg_fetch_row($result2)) {
+         case ($pRel=="Herencia" & $pDir=="Izq"):
+             $pu= $pu."$row[0].$table1 $c$pC1$c --|> $c$pC2$c $row2[0].$table2 : $pRol \n";
              break;
-         }
-         elseif($pRel=="Herencia" & $pDir=="Der"){
-             $pu= $pu."$table2 $c$pC2$c  <|-- $c$pC1$c  $table1 : $pRol \n";
+         
+             case($pRel=="Herencia" & $pDir=="Der"):
+             $pu= $pu."$row2[0].$table2 $c$pC2$c  <|-- $c$pC1$c  $row[0].$table1 : $pRol \n";
              break;
-         }
-         elseif($pRel=="Composicion" & $pDir=="Izq"){
-             $pu= $pu."$table1 $c$pC1$c --* $c$pC2$c $table2 : $pRol \n";
+         
+             case($pRel=="Composicion" & $pDir=="Izq"):
+             $pu= $pu."$row[0].$table1 $c$pC1$c --* $c$pC2$c $row2[0].$table2 : $pRol \n";
              break;
-         }
-         elseif($pRel=="Composicion" & $pDir=="Der"){
-             $pu= $pu."$table2 $c$pC2$c *-- $c$pC1$c $table1 : $pRol \n";
+         
+             case($pRel=="Composicion" & $pDir=="Der"):
+             $pu= $pu."$row2[0].$table2 $c$pC2$c *-- $c$pC1$c $row[0].$table1 : $pRol \n";
              break;
-         }
-         elseif ($pRel=="Agregacion" & $pDir=="Izq"){
-             $pu= $pu."$table1 $c$pC1$c --o $c$pC2$c $table2 : $pRol \n";
+         
+             case ($pRel=="Agregacion" & $pDir=="Izq"):
+             $pu= $pu."$row[0].$table1 $c$pC1$c --o $c$pC2$c $row2[0].$table2 : $pRol \n";
              break;
-         }
-         elseif($pRel=="Agregacion" & $pDir=="Der"){
-             $pu= $pu."$table2 $c$pC2$c o-- $c$pC1$c $table1 : $pRol \n";
+         
+             case($pRel=="Agregacion" & $pDir=="Der"):
+             $pu= $pu."$row2[0].$table2 $c$pC2$c o-- $c$pC1$c $row[0].$table1 : $pRol \n";
              break;
-         }
-         elseif ($pRel=="Asociacion" & $pDir=="Izq"){
-             $pu= $pu."$table1 $c$pC1$c --> $c$pC2$c $table2 : $pRol \n";
+         
+             case ($pRel=="Asociacion" & $pDir=="Izq"):
+             $pu= $pu."$row[0].$table1 $c$pC1$c --> $c$pC2$c $row2[0].$table2 : $pRol \n";
              break;
-         }
-         elseif($pRel=="Asociacion" & $pDir=="Der"){
-             $pu= $pu."$table2 $c$pC2$c <-- $c$pC1$c $table1 : $pRol \n";
+         
+             case($pRel=="Asociacion" & $pDir=="Der"):
+             $pu= $pu."$row2[0].$table2 $c$pC2$c <-- $c$pC1$c $row[0].$table1 : $pRol \n";
              break;
-         }
-         elseif($pRel=="Asociacion" & $pDir=="Bid"){
-             $pu= $pu."$table2 $c$pC2$c -- $c$pC1$c $table1 : $pRol \n";
+         
+             case($pRel=="Asociacion" & $pDir=="Bid"):
+             $pu= $pu."$row2[0].$table2 $c$pC2$c -- $c$pC1$c $row[0].$table1 : $pRol \n";
              break;
-         }
+         
      }
  }
+ $pu= $pu."admi.congresos -- admi.actividades : tiene 
+          \nadmi.actividades -- admi.ponencias : tiene 
+          \nadmi.lugaresactividades -- admi.lugares : tiene 
+          \nadmi.lugaresactividades -- admi.actividades : tiene 
+          \n";
 
 $pu= $pu."@enduml";
 
@@ -176,6 +185,12 @@ $encode = encodep($pu);
 echo "<textarea rows='20' cols='50'>$pu</textarea><br>";
 echo "<textarea rows='5' cols='50'>$encode</textarea><br>";
 echo "<img src='http://www.plantuml.com/plantuml/img/$encode'>";
+
+$toJsonUml = json_encode($pu);
+$pNameDiagram = "diagramTest";
+$pUser = "postgress";
+$pqueryF= "public.ins_diagrama($pNameDiagram,$pUser,$toJsonUml);";
+//pg_query($conn, $pqueryF);
 
 ?>
 </body>
