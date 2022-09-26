@@ -5,7 +5,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./styles/login.css">
-    <title>Diagrams Generator</title>
+    <link rel="shortcut icon" href="./media/idenx.png" type="image/x-icon">
+    <title>Diagrams MF</title>
 </head>
 <body>
 
@@ -21,7 +22,7 @@
 
     <section id="hero">
         <h1>Log In Page</h1>
-        <form action="./login.html" method="post">
+        <form action="./com/user.php" method="post">
             <section id="credenciales">
                 <ul>
                     <li>
@@ -30,7 +31,7 @@
                     </li>
                     <li>
                         <label for="port">Port</label>
-                        <input id="host" name="txtHost" type="text" maxlength="30" >
+                        <input id="host" name="txtPort" type="text" maxlength="30" >
                     </li>
                     <li>
                         <label for="dbname">D.B. Name</label>

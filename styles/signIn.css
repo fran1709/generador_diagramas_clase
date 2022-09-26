@@ -1,6 +1,7 @@
 *{box-sizing: border-box;}
 
-h1{font-size: 3.0em;}
+h1{font-size: 3.0em;
+margin-left: 40px;}
 h2{font-size: 2.7em;}
 h3{font-size: 2em;}
 p{font-size: 1.25em;}
@@ -80,16 +81,11 @@ header a:hover{
     background-size: cover;
     background-position: center center;
 }
-#hero h1{
-    margin-left: 40px;
-    margin-bottom: 10px;
-}
 #hero button{
-    margin-left: 40px;
-    margin-top: 15px;
+    margin-top: 25px;
 }
 #credenciales {
-    display: flex;
+    display: table;
     align-self: center;
     align-items: center;
     text-align: center;
@@ -99,9 +95,8 @@ header a:hover{
 #credenciales li{
     padding: 7px;
     font-weight: bold;
-    display:block;
+    display:inline-block;
 }
-
 #credenciales input{
     display: flex;
     align-content: center;
